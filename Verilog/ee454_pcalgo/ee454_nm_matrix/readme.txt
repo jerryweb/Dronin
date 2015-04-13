@@ -15,10 +15,10 @@ desired size.
 Specifications
 ===============================================================================
 
-address size    (m_addr, n_addr):		 7-bit
-dimensions size (n_dim, m_dim):			7-bit
-data size       (data_in, data_out):	32-bit
-memory size     (matrix): 				    128-by-128 matrix
+address size    (m_addr, n_addr):     7-bit
+dimensions size (n_dim, m_dim):       7-bit
+data size       (data_in, data_out):  32-bit
+memory size     (matrix):             128-by-128 matrix
 
 ===============================================================================
 Design
