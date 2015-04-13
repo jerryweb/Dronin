@@ -10,18 +10,18 @@
 module mn_matrix(reset, clk, write, read, m_dim, n_dim, m_addr, n_addr, transpose, data_in, data_out);
 
  // inputs
-input			reset, clk;
+input	reset, clk;
 input   write, read;
 input   transpose;
-input [31:0]	m_dim, n_dim;
-input [31:0] m_addr, n_addr;
+input [7:0]		m_dim, n_dim;
+input [7:0]		m_addr, n_addr;
 input [31:0]	data_in;
  // outputs
 output	[31:0]	data_out;
 
  // regs
-reg [31:0]    data_out;
-reg [31:0]    matrix [128-1:0][128-1:0];
+reg [31:0]		data_out;
+reg [31:0]		matrix [128-1:0][128-1:0];
 
  // loop integers
 integer   i, j;
