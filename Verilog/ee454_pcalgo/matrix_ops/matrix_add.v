@@ -7,9 +7,9 @@
 // Module Name:    matrix_add
 //////////////////////////////////////////////////////////////////////////////////
 
-`include "../matrix_construct/matrix_io.sv"
+`include "matrix_io.sv"
 
-module mn_add(reset, clk, start, m1_dim, n1_dim, matrix1_in, m2_dim, n2_dim, matrix2_in, matrix_out);
+module matrix_add(reset, clk, start, m1_dim, n1_dim, matrix1_in, m2_dim, n2_dim, matrix2_in, matrix_out);
 
  // inputs
 input       reset, clk;
@@ -19,9 +19,10 @@ input [7:0] m2_dim, n2_dim;
 input [128*128*3-1:0]   matrix1_in, matrix2_in;
 
  // outputs
-output	[128*128*3-1:0] matrix_out;
+output	[128*128*3-1:0]  matrix_out;
 
  // regs
+reg                     clk_reg;
 reg [1:0]               state;
 reg [128*128*32-1:0]    matrix_out;
 
@@ -75,6 +76,13 @@ mn_matrix matrix2(
 .data_out(data2_out)
 );
 
+initial
+begin: CLOCK_GENERATOR
+    forever
+    begin			clk_reg <= clk;
+		end
+end
+ 
 always @(posedge clk, posedge reset) //asynchronous active_high Reset
  begin
     if (reset) 
@@ -88,34 +96,39 @@ always @(posedge clk, posedge reset) //asynchronous active_high Reset
      begin
         case (state)
             IDLE:
+            begin
                 m_addr <= 0;
                 n_addr <= 0;
                 
                 if (start && m1_dim == m2_dim && n1_dim == n2_dim)
                 begin
-                    write_matrix_from_array(matrix1_in, m1_dim, n1_dim, clk, write1, read1, transpose1, m1_dim, n1_dim, m_addr, n_addr, data1_in);
-                    write_matrix_from_array(matrix2_in, m1_dim, n2_dim, clk, write2, read2, transpose2, m2_dim, n2_dim, m_addr, n_addr, data2_in);
+                    write_matrix_from_array(matrix1_in, m1_dim, n1_dim, clk_reg, write1, read1, transpose1, m1_dim, n1_dim, m_addr, n_addr, data1_in);
+                    write_matrix_from_array(matrix2_in, m1_dim, n2_dim, clk_reg, write2, read2, transpose2, m2_dim, n2_dim, m_addr, n_addr, data2_in);
                     
                     k <= 0;
                     state <= COMPUTE;
                 end
+            end
             COMPUTE:
-                begin            
-                    matrix_out[k+31:k] <= data1_out + data2_out;
+            begin
+                    for (i = k; i < k + 32; i = i +1)
+                      matrix_out[i] <= data1_out[i] + data2_out[i];
                     // move column
                     n_addr <= n_addr + 1;
                     // move row
-                    if (n_addr == (n_dim - 1))
+                    if (n_addr == (n1_dim - 1))
                     begin
                         n_addr <= 0;
                         m_addr <= m_addr + 1;
                     end
                     k <= k + 32;
                     
-                    if (n_addr == (n_dim - 1) && m_addr == (m_addr - 1))
+                    if (n_addr == (n1_dim - 1) && m_addr == (m1_dim - 1))
                         state <= IDLE;
-                end
+            end
         endcase
     end
 end // end of always procedural block 
 endmodule
+
+
